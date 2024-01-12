@@ -1,0 +1,4 @@
+playwright
+feedgenerator
+dotenv
+dateparser
