@@ -12,9 +12,9 @@ import pytz
 
 load_dotenv()
 
-#WWW_ROOT = "/var/www/rss/"
-WWW_ROOT = "./"
-SCROLLS = 3
+WWW_ROOT = "/var/www/rss/"
+#WWW_ROOT = "./"
+SCROLLS = 6
 save_tweets = []
 
 async def run(playwright: Playwright):
