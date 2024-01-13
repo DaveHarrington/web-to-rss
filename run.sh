@@ -10,4 +10,4 @@ cd /home/dave/web-to-rss/
 
 source .venv/bin/activate
 
-python screenshot.sh
+python screenshot.py
