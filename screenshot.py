@@ -12,12 +12,16 @@ import pytz
 
 load_dotenv()
 
+TWITTER_USERS = ["mattyglesia", "shashj"]
+
 WWW_ROOT = "/var/www/rss/"
-#WWW_ROOT = "./"
+# WWW_ROOT = "./"
 SCROLLS = 6
+RETRIES = 3
+
 save_tweets = []
 
-async def run(playwright: Playwright):
+async def run(playwright: Playwright, twitter_user):
 
     playwright = await async_playwright().start()
     browser = await playwright.chromium.launch()
@@ -32,8 +36,17 @@ async def run(playwright: Playwright):
     }]
     await context.add_cookies(twitter_cookies)
     page = await context.new_page()
-    await page.goto("https://twitter.com/mattyglesias")
-    await page.wait_for_selector('[data-testid="tweet"]')
+
+    retries = RETRIES
+    while retries:
+        retries -= 1
+        try:
+            await page.goto("https://twitter.com/" + twitter_user)
+            await page.wait_for_selector('[data-testid="tweet"]')
+        except Exception as e:
+            if not retries:
+                print(e)
+                return
 
     # Try to remove banner cruft
     await page.evaluate("""
@@ -118,7 +131,8 @@ async def run(playwright: Playwright):
 
 async def main():
     async with async_playwright() as playwright:
-        await run(playwright)
+        for twitter_user in TWITTER_USERS:
+            await run(playwright, twitter_user)
 
 def parse_time_string(time_str):
     return parsed_date
@@ -126,15 +140,16 @@ def parse_time_string(time_str):
 def gen_feed(save_tweets):
     # Initialize RSS feed
     feed = Rss201rev2Feed(
-        title="Web-to-RSS",
-        description="Capture infinite feeds to RSS",
+        title="TwitterRSS",
+        description="Grab Twitter Feed to RSS",
         link="https://rpi4.duckbill-woodpecker.ts.net/rss",
         language="en",
     )
     for t in save_tweets:
         desc = f"<img src=\"{t['img']}\", title=\"{t['tweet_txt']}\", alt=\"{t['tweet_txt']}\"/>"
+        words = " ".join(t['tweet_txt'].split(" ")[:5])
         feed.add_item(
-            title=f"Tweet from {t['user']}",
+                title=f"{t['user']}: {words}...",
             link=t["link"],
             description=desc,
             pubdate=t["datetime"],
