@@ -12,7 +12,7 @@ import pytz
 
 load_dotenv()
 
-TWITTER_USERS = ["mattyglesia", "shashj"]
+TWITTER_USERS = ["mattyglesias", "shashj"]
 
 WWW_ROOT = "/var/www/rss/"
 # WWW_ROOT = "./"
